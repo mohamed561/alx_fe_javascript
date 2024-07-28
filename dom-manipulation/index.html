@@ -3,15 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Dynamic Quote Generator</title>
+    <title>Dynamic Quote Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; }
+        #quoteDisplay { margin: 20px 0; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        button, select, input { margin: 5px; padding: 5px; }
+        #notification { color: #ff0000; margin-top: 10px; }
+    </style>
 </head>
 <body>
-    <h1>Advanced Dynamic Quote Generator</h1>
+    <h1>Dynamic Quote Generator</h1>
     <select id="categoryFilter">
-        <option value="All Categories">All Categories</option>
+        <option value="all">All Categories</option>
     </select>
     <div id="quoteDisplay"></div>
-    <button id="syncButton">Sync with Server</button>
+    <button id="newQuote">Show New Quote</button>
+    <div>
+        <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
+        <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
+        <button id="addQuoteBtn">Add Quote</button>
+    </div>
+    <div>
+        <button id="exportButton">Export Quotes</button>
+        <input type="file" id="importFile" accept=".json" />
+    </div>
+    <div id="notification"></div>
     <script src="script.js"></script>
 </body>
 </html>

@@ -41,6 +41,7 @@ function addQuote() {
     } else {
         alert('Please enter both quote text and category.');
     }
+    filterQuotes(); // Update the displayed quotes after adding a new one
 }
 
 // Function to export quotes to a JSON file

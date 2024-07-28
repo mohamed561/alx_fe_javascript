@@ -19,7 +19,7 @@ function loadQuotes() {
         ];
         saveQuotes();
     }
-    updateCategoryFilter();
+    populateCategories();
 }
 
 // Function to display a random quote
@@ -60,7 +60,7 @@ function addQuote() {
         const newQuote = { text: newQuoteText, category: newQuoteCategory };
         quotes.push(newQuote);
         saveQuotes();
-        updateCategoryFilter();
+        populateCategories();
         alert('New quote added successfully!');
         document.getElementById('newQuoteText').value = '';
         document.getElementById('newQuoteCategory').value = '';
@@ -115,15 +115,15 @@ function importFromJsonFile(event) {
         const importedQuotes = JSON.parse(event.target.result);
         quotes.push(...importedQuotes);
         saveQuotes();
-        updateCategoryFilter();
+        populateCategories();
         updateQuotesList();
         alert('Quotes imported successfully!');
     };
     fileReader.readAsText(event.target.files[0]);
 }
 
-// Function to update category filter dropdown
-function updateCategoryFilter() {
+// Function to populate categories
+function populateCategories() {
     const categoryFilter = document.getElementById('categoryFilter');
     const categories = ['all', ...new Set(quotes.map(quote => quote.category))];
     
@@ -131,7 +131,7 @@ function updateCategoryFilter() {
         `<option value="${category}">${category === 'all' ? 'All Categories' : category}</option>`
     ).join('');
 
-    // Set the selected category
+    // Restore the last selected category
     const lastSelectedCategory = localStorage.getItem('lastSelectedCategory') || 'all';
     categoryFilter.value = lastSelectedCategory;
 }

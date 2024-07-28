@@ -59,7 +59,7 @@ function addQuote() {
         saveQuotes();
         populateCategories();
         updateQuotesList();
-        syncWithServer();
+        syncQuotes();
         alert('New quote added successfully!');
         document.getElementById('newQuoteText').value = '';
         document.getElementById('newQuoteCategory').value = '';
@@ -113,7 +113,7 @@ function importFromJsonFile(event) {
         saveQuotes();
         populateCategories();
         updateQuotesList();
-        syncWithServer();
+        syncQuotes();
         alert('Quotes imported successfully!');
     };
     fileReader.readAsText(event.target.files[0]);
@@ -139,10 +139,21 @@ function filterQuotes() {
     updateQuotesList();
 }
 
-// Function to simulate server interaction
-async function syncWithServer() {
+// Function to fetch quotes from server
+async function fetchQuotesFromServer() {
     try {
-        // Simulate sending data to server
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts/1');
+        const data = await response.json();
+        return JSON.parse(data.body || '[]');
+    } catch (error) {
+        console.error('Error fetching quotes from server:', error);
+        return [];
+    }
+}
+
+// Function to post quotes to server
+async function postQuotesToServer(quotes) {
+    try {
         const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
             method: 'POST',
             body: JSON.stringify(quotes),
@@ -151,28 +162,30 @@ async function syncWithServer() {
             },
         });
         const data = await response.json();
-        console.log('Data synced with server:', data);
-
-        // Simulate receiving data from server
-        const serverResponse = await fetch('https://jsonplaceholder.typicode.com/posts/1');
-        const serverData = await serverResponse.json();
-        
-        // Simple conflict resolution (server data takes precedence)
-        if (serverData && serverData.body) {
-            const serverQuotes = JSON.parse(serverData.body);
-            if (serverQuotes.length > quotes.length) {
-                const newQuotes = serverQuotes.slice(quotes.length);
-                quotes.push(...newQuotes);
-                saveQuotes();
-                populateCategories();
-                updateQuotesList();
-                showNotification('New quotes synced from server');
-            }
-        }
+        console.log('Quotes posted to server:', data);
     } catch (error) {
-        console.error('Error syncing with server:', error);
-        showNotification('Error syncing with server', 'error');
+        console.error('Error posting quotes to server:', error);
     }
+}
+
+// Function to sync quotes with server
+async function syncQuotes() {
+    const serverQuotes = await fetchQuotesFromServer();
+    
+    // Simple conflict resolution (server data takes precedence)
+    if (serverQuotes.length > quotes.length) {
+        const newQuotes = serverQuotes.slice(quotes.length);
+        quotes.push(...newQuotes);
+        saveQuotes();
+        populateCategories();
+        updateQuotesList();
+        showNotification('New quotes synced from server');
+    }
+    
+    // Post local quotes to server
+    await postQuotesToServer(quotes);
+    
+    updateSyncStatus('Sync complete');
 }
 
 // Function to show notifications
@@ -185,6 +198,12 @@ function showNotification(message, type = 'info') {
     notification.style.backgroundColor = type === 'error' ? '#ffcccc' : '#ccffcc';
     document.body.insertBefore(notification, document.body.firstChild);
     setTimeout(() => notification.remove(), 5000);
+}
+
+// Function to update sync status
+function updateSyncStatus(status) {
+    const syncStatus = document.getElementById('syncStatus');
+    syncStatus.textContent = `Sync Status: ${status}`;
 }
 
 // Event listeners
@@ -200,7 +219,7 @@ updateQuotesList();
 showRandomQuote();
 
 // Periodic sync with server (every 5 minutes)
-setInterval(syncWithServer, 5 * 60 * 1000);
+setInterval(syncQuotes, 5 * 60 * 1000);
 
 // Display last viewed quote from session storage (if available)
 const lastViewedQuote = sessionStorage.getItem('lastViewedQuote');

@@ -158,7 +158,7 @@ async function postQuotesToServer(quotes) {
             method: 'POST',
             body: JSON.stringify(quotes),
             headers: {
-                'Content-type': 'application/json; charset=UTF-8',
+                'Content-Type': 'application/json; charset=UTF-8',
             },
         });
         const data = await response.json();
@@ -170,13 +170,14 @@ async function postQuotesToServer(quotes) {
 
 // Function to sync quotes with server
 async function syncQuotes() {
+    updateSyncStatus('Syncing...');
     const serverQuotes = await fetchQuotesFromServer();
     
     // Simple conflict resolution (server data takes precedence)
     if (serverQuotes.length > quotes.length) {
         const newQuotes = serverQuotes.slice(quotes.length);
         quotes.push(...newQuotes);
-        saveQuotes();
+        saveQuotes(); // Update local storage
         populateCategories();
         updateQuotesList();
         showNotification('New quotes synced from server');
@@ -221,9 +222,13 @@ showRandomQuote();
 // Periodic sync with server (every 5 minutes)
 setInterval(syncQuotes, 5 * 60 * 1000);
 
+// Initial sync on page load
+syncQuotes();
+
 // Display last viewed quote from session storage (if available)
 const lastViewedQuote = sessionStorage.getItem('lastViewedQuote');
 if (lastViewedQuote) {
     const lastQuote = JSON.parse(lastViewedQuote);
     console.log('Last viewed quote:', lastQuote);
 }
+

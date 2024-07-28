@@ -34,18 +34,6 @@ function showRandomQuote() {
     sessionStorage.setItem('lastViewedQuote', JSON.stringify(quote));
 }
 
-// Function to create and display the form for adding new quotes
-function createAddQuoteForm() {
-    const formContainer = document.createElement('div');
-    formContainer.innerHTML = `
-        <h2>Add a New Quote</h2>
-        <input id="newQuoteText" type="text" placeholder="Enter a new quote" />
-        <input id="newQuoteCategory" type="text" placeholder="Enter quote category" />
-        <button onclick="addQuote()">Add Quote</button>
-    `;
-    document.body.appendChild(formContainer);
-}
-
 // Function to add a new quote
 function addQuote() {
     const newQuoteText = document.getElementById('newQuoteText').value;
@@ -63,7 +51,7 @@ function addQuote() {
 }
 
 // Function to export quotes to JSON file
-function exportToJson() {
+function exportToJsonFile() {
     const jsonStr = JSON.stringify(quotes, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -93,27 +81,19 @@ function importFromJsonFile(event) {
     fileReader.readAsText(event.target.files[0]);
 }
 
-// Event listener for the "Show New Quote" button
-document.getElementById('newQuote').addEventListener('click', showRandomQuote);
-
 // Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
     loadQuotes();
     showRandomQuote();
-    createAddQuoteForm();
 
-    // Create export button
-    const exportButton = document.createElement('button');
-    exportButton.textContent = 'Export Quotes';
-    exportButton.onclick = exportToJson;
-    document.body.appendChild(exportButton);
+    // Event listener for the "Show New Quote" button
+    document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 
-    // Create import input
-    const importInput = document.createElement('input');
-    importInput.type = 'file';
-    importInput.accept = '.json';
-    importInput.onchange = importFromJsonFile;
-    document.body.appendChild(importInput);
+    // Event listener for the "Export Quotes" button
+    document.getElementById('exportQuotes').addEventListener('click', exportToJsonFile);
+
+    // Event listener for the import file input
+    document.getElementById('importFile').addEventListener('change', importFromJsonFile);
 
     // Display last viewed quote if available
     const lastViewedQuote = sessionStorage.getItem('lastViewedQuote');

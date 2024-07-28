@@ -181,6 +181,8 @@ async function syncQuotes() {
         populateCategories();
         updateQuotesList();
         showNotification('New quotes synced from server');
+    } else {
+        showNotification('Quotes synced with server!'); // Added notification here
     }
     
     // Post local quotes to server

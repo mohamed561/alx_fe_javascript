@@ -29,7 +29,6 @@ function showRandomQuote() {
         const randomIndex = Math.floor(Math.random() * quotes.length);
         const quote = quotes[randomIndex];
         quoteDisplay.innerHTML = `<p>"${quote.text}"</p><p><em>Category: ${quote.category}</em></p>`;
-        // Store last viewed quote in session storage
         sessionStorage.setItem('lastViewedQuote', JSON.stringify(quote));
     } else {
         quoteDisplay.innerHTML = "<p>No quotes available. Add some quotes!</p>";
@@ -46,8 +45,6 @@ function createAddQuoteForm() {
         <button id="addQuoteBtn">Add Quote</button>
     `;
     document.body.appendChild(formContainer);
-
-    // Add event listener to the new "Add Quote" button
     document.getElementById('addQuoteBtn').addEventListener('click', addQuote);
 }
 
@@ -61,12 +58,11 @@ function addQuote() {
         quotes.push(newQuote);
         saveQuotes();
         populateCategories();
+        updateQuotesList();
+        syncWithServer();
         alert('New quote added successfully!');
         document.getElementById('newQuoteText').value = '';
         document.getElementById('newQuoteCategory').value = '';
-        
-        // Update the DOM to reflect the new quote
-        updateQuotesList();
     } else {
         alert('Please enter both quote text and category.');
     }
@@ -75,7 +71,7 @@ function addQuote() {
 // Function to create and update the list of all quotes
 function updateQuotesList() {
     const quotesList = document.getElementById('quotesList') || createQuotesList();
-    quotesList.innerHTML = ''; // Clear existing list
+    quotesList.innerHTML = '';
     const selectedCategory = document.getElementById('categoryFilter').value;
     
     quotes.forEach(quote => {
@@ -117,6 +113,7 @@ function importFromJsonFile(event) {
         saveQuotes();
         populateCategories();
         updateQuotesList();
+        syncWithServer();
         alert('Quotes imported successfully!');
     };
     fileReader.readAsText(event.target.files[0]);
@@ -131,7 +128,6 @@ function populateCategories() {
         `<option value="${category}">${category === 'all' ? 'All Categories' : category}</option>`
     ).join('');
 
-    // Restore the last selected category
     const lastSelectedCategory = localStorage.getItem('lastSelectedCategory') || 'all';
     categoryFilter.value = lastSelectedCategory;
 }
@@ -141,6 +137,54 @@ function filterQuotes() {
     const selectedCategory = document.getElementById('categoryFilter').value;
     localStorage.setItem('lastSelectedCategory', selectedCategory);
     updateQuotesList();
+}
+
+// Function to simulate server interaction
+async function syncWithServer() {
+    try {
+        // Simulate sending data to server
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+            method: 'POST',
+            body: JSON.stringify(quotes),
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+            },
+        });
+        const data = await response.json();
+        console.log('Data synced with server:', data);
+
+        // Simulate receiving data from server
+        const serverResponse = await fetch('https://jsonplaceholder.typicode.com/posts/1');
+        const serverData = await serverResponse.json();
+        
+        // Simple conflict resolution (server data takes precedence)
+        if (serverData && serverData.body) {
+            const serverQuotes = JSON.parse(serverData.body);
+            if (serverQuotes.length > quotes.length) {
+                const newQuotes = serverQuotes.slice(quotes.length);
+                quotes.push(...newQuotes);
+                saveQuotes();
+                populateCategories();
+                updateQuotesList();
+                showNotification('New quotes synced from server');
+            }
+        }
+    } catch (error) {
+        console.error('Error syncing with server:', error);
+        showNotification('Error syncing with server', 'error');
+    }
+}
+
+// Function to show notifications
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.textContent = message;
+    notification.style.padding = '10px';
+    notification.style.margin = '10px 0';
+    notification.style.borderRadius = '5px';
+    notification.style.backgroundColor = type === 'error' ? '#ffcccc' : '#ccffcc';
+    document.body.insertBefore(notification, document.body.firstChild);
+    setTimeout(() => notification.remove(), 5000);
 }
 
 // Event listeners
@@ -154,6 +198,9 @@ loadQuotes();
 createAddQuoteForm();
 updateQuotesList();
 showRandomQuote();
+
+// Periodic sync with server (every 5 minutes)
+setInterval(syncWithServer, 5 * 60 * 1000);
 
 // Display last viewed quote from session storage (if available)
 const lastViewedQuote = sessionStorage.getItem('lastViewedQuote');

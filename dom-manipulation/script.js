@@ -19,6 +19,7 @@ function loadQuotes() {
         ];
         saveQuotes();
     }
+    updateCategoryFilter();
 }
 
 // Function to display a random quote
@@ -59,6 +60,7 @@ function addQuote() {
         const newQuote = { text: newQuoteText, category: newQuoteCategory };
         quotes.push(newQuote);
         saveQuotes();
+        updateCategoryFilter();
         alert('New quote added successfully!');
         document.getElementById('newQuoteText').value = '';
         document.getElementById('newQuoteCategory').value = '';
@@ -74,10 +76,14 @@ function addQuote() {
 function updateQuotesList() {
     const quotesList = document.getElementById('quotesList') || createQuotesList();
     quotesList.innerHTML = ''; // Clear existing list
+    const selectedCategory = document.getElementById('categoryFilter').value;
+    
     quotes.forEach(quote => {
-        const quoteItem = document.createElement('li');
-        quoteItem.textContent = `"${quote.text}" - ${quote.category}`;
-        quotesList.appendChild(quoteItem);
+        if (selectedCategory === 'all' || quote.category === selectedCategory) {
+            const quoteItem = document.createElement('li');
+            quoteItem.textContent = `"${quote.text}" - ${quote.category}`;
+            quotesList.appendChild(quoteItem);
+        }
     });
 }
 
@@ -109,16 +115,39 @@ function importFromJsonFile(event) {
         const importedQuotes = JSON.parse(event.target.result);
         quotes.push(...importedQuotes);
         saveQuotes();
+        updateCategoryFilter();
         updateQuotesList();
         alert('Quotes imported successfully!');
     };
     fileReader.readAsText(event.target.files[0]);
 }
 
+// Function to update category filter dropdown
+function updateCategoryFilter() {
+    const categoryFilter = document.getElementById('categoryFilter');
+    const categories = ['all', ...new Set(quotes.map(quote => quote.category))];
+    
+    categoryFilter.innerHTML = categories.map(category => 
+        `<option value="${category}">${category === 'all' ? 'All Categories' : category}</option>`
+    ).join('');
+
+    // Set the selected category
+    const lastSelectedCategory = localStorage.getItem('lastSelectedCategory') || 'all';
+    categoryFilter.value = lastSelectedCategory;
+}
+
+// Function to filter quotes
+function filterQuotes() {
+    const selectedCategory = document.getElementById('categoryFilter').value;
+    localStorage.setItem('lastSelectedCategory', selectedCategory);
+    updateQuotesList();
+}
+
 // Event listeners
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 document.getElementById('exportJson').addEventListener('click', exportToJsonFile);
 document.getElementById('importFile').addEventListener('change', importFromJsonFile);
+document.getElementById('categoryFilter').addEventListener('change', filterQuotes);
 
 // Initial setup
 loadQuotes();

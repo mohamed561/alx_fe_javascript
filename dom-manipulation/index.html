@@ -17,7 +17,7 @@
             margin: 20px 0;
             border-radius: 5px;
         }
-        input, button {
+        input, button, select {
             margin: 5px;
             padding: 5px;
         }
@@ -37,6 +37,13 @@
     <h1>Dynamic Quote Generator</h1>
     <div id="quoteDisplay"></div>
     <button id="newQuote">Show New Quote</button>
+    <div>
+        <h2>Filter Quotes</h2>
+        <select id="categoryFilter">
+            <option value="all">All Categories</option>
+            <!-- Dynamically populated categories -->
+        </select>
+    </div>
     <div>
         <h2>Import/Export Quotes</h2>
         <button id="exportJson">Export Quotes to JSON</button>
